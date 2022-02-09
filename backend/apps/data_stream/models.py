@@ -53,5 +53,3 @@ class Warehouse(models.Model):
     delivery_voucher = models.ForeignKey(Delivery_voucher, on_delete=CASCADE)
     return_voucher = models.ForeignKey(Return_voucher, on_delete=CASCADE)
     reception_voucher = models.ForeignKey(Reception_voucher, on_delete=CASCADE)
-
-
