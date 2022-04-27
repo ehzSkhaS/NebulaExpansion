@@ -25,7 +25,12 @@ SECRET_KEY = 'django-insecure-k5@@d2&-)%!_0+cccz8$*vqbmv_xx1%s0_whocfn)!e0722n5d
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# FUNCTIONALITY ISSUE: change the ip of the allowed django server once you reach production
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '172.28.215.186'
+]
 
 
 # Application definition
@@ -72,11 +77,15 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
-
+# FUNCTIONALITY ISSUE: change the database connection parameters once you reach production
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'nebula',
+        'USER': 'dev',
+        'PASSWORD': 'FrostBite',
+        'HOST': '172.28.215.186',
+        'PORT': '5432',
     }
 }
 
