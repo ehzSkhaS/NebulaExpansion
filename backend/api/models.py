@@ -91,5 +91,19 @@ class Cost_Center(models.Model):
     def __str__(self):
         return self.name
 
+class Cost_Center_Inventory(models.Model):
+    code_cost_center = models.ForeignKey(Cost_Center, on_delete=models.CASCADE)
+    code_product = models.ForeignKey(Product, to_field='code', on_delete=models.CASCADE)
+    code_provider = models.ForeignKey(Product, to_field='code_provider', on_delete=models.CASCADE)
+    quantity = models.DecimalField(max_digits=10, decimal_places=4)
+    
+    class Meta:
+        verbose_name = "Cost_Center_Inventory"
+        verbose_name_plural = "Cost_Center_Inventorys"
+        unique_together = (('code_cost_center', 'code_product', 'code_provider'),)
+
+    def __str__(self):
+        return "code cost center: " + self.code_cost_center + " " +  "code product: " + self.code_product + " " + "code provider: " + self.code_provider
+
 # Client End ------------------------------------------------------------------------------------------------------------------------------------------------
     
