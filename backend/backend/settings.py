@@ -29,7 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '172.28.215.186'
+    '*'
 ]
 
 
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -83,9 +84,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'nebula',
-        'USER': 'dev',
-        'PASSWORD': 'FrostBite',
-        'HOST': '172.28.215.186',
+        'USER': 'adminrc',
+        'PASSWORD': 'adminrc*753',
+        'HOST': '127.0.0.1',
         'PORT': '5432',
     }
 }
