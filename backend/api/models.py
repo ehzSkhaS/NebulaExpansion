@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
+
 class Inventory(models.Model):
     quantity = models.DecimalField(max_digits=10, decimal_places=4, null=True)
     
@@ -172,15 +173,14 @@ class DeliveryListSC208(Order):
         verbose_name_plural = "Delivery Lists SC-2-08"
         unique_together = (('delivery_voucher', 'order_product'),)    
         
-    def clean(self):
-        delivery_obj = DeliverySC208.objects.get(voucher=self.delivery_voucher)
-        #warehouse_inventory_id = delivery_obj.values()['order_warehouse_inventory']
-        #cost_center_inventory_id = delivery_obj.values()['order_cost_center_inventory']        
+    def clean(self):        
+        warehouse_inventory_obj = DeliverySC208.objects.get(voucher = self.delivery_voucher.voucher).order_warehouse_inventory
+        cost_center_inventory_id = DeliverySC208.objects.get(voucher = self.delivery_voucher.voucher).order_cost_center_inventory
         #warehouse_inventory_obj = WarehouseInventory.objects.filter(pk=warehouse_inventory_id)
         #cost_center_inventory_obj = CostCenterInventory.objects.filter(pk=cost_center_inventory_id)
         
-        #if warehouse_inventory_obj.values('quantity')['quantity'] < self.quantity:
-        #    raise ValidationError({'quantity': _('Deliver quantity must be less or equal to stored quantity')})
+        if warehouse_inventory_obj.quantity is None or warehouse_inventory_obj.quantity < self.quantity:
+            raise ValidationError({'quantity': 'deliver quantity must be less or equal to stored quantity'})
      
     def __str__(self):
         return str(self.pk)
