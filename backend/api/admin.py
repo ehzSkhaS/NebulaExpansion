@@ -52,19 +52,19 @@ class ProviderModel(admin.ModelAdmin):
 class ProviderInventoryModel(admin.ModelAdmin):
     list_display = (
         'pk',
-        'code_provider',
-        'code_product',
+        'provider',
+        'product',
         'quantity'
     )
     list_filter = (
-        'code_provider',
-        'code_product',
+        'provider',
+        'product',
         'quantity'
     )
     search_fields = (
         'pk',
-        'code_provider',
-        'code_product',
+        'provider',
+        'product',
         'quantity'
     )
     list_per_page = 10
@@ -85,7 +85,7 @@ class WarehouseModel(admin.ModelAdmin):
     )
     search_fields = (
         'code',
-        'name',
+        'name'
     )
     list_per_page = 10
 
@@ -94,13 +94,13 @@ class WarehouseModel(admin.ModelAdmin):
 class WarehouseInventoryModel(admin.ModelAdmin):
     list_display = (
         'pk',
-        'code_warehouse',
-        'code_product',
+        'warehouse',
+        'product',
         'quantity'
     )
     list_filter = (
-        'code_warehouse',
-        'code_product',
+        'warehouse',
+        'product',
         'quantity'
     )    
     readonly_fields = (
@@ -108,8 +108,8 @@ class WarehouseInventoryModel(admin.ModelAdmin):
     )
     search_fields = (
         'pk',
-        'code_warehouse',
-        'code_product',
+        'warehouse',
+        'product',
         'quantity'
     )
     list_per_page = 10
@@ -140,7 +140,7 @@ class CostCenterModel(admin.ModelAdmin):
     list_display = (
         'code',
         'name',
-        'code_unit'
+        'unit'
     )
     list_filter = (
         'name',
@@ -148,7 +148,7 @@ class CostCenterModel(admin.ModelAdmin):
     search_fields = (
         'code',
         'name',
-        'code_unit'
+        'unit'
     )
     list_per_page = 10
 
@@ -160,19 +160,19 @@ class CostCenterInventoryModel(admin.ModelAdmin):
     )
     list_display = (
         'pk',
-        'code_cost_center',
-        'code_product',
+        'cost_center',
+        'product',
         'quantity',
     )
     list_filter = (
-        'code_cost_center',
-        'code_product',
+        'cost_center',
+        'product',
         'quantity',
     )
     search_fields = (
         'pk',
-        'code_cost_center',
-        'code_product',
+        'cost_center',
+        'product',
         'quantity'
     )
     list_per_page = 10
@@ -194,20 +194,20 @@ class DeliveryModel(admin.ModelAdmin):
         'request_voucher_2',
         'request_plan',
         'date_stamp',
-        'ci_cost_center_receiver',
-        'ci_warehouse_dispatcher',        
-        'order_warehouse_inventory',
-        'order_cost_center_inventory',
+        'warehouse_dispatcher',
+        'cost_center_receiver',        
+        'warehouse_inventory',
+        'cost_center_inventory',
     )
     list_filter = (
         'request_voucher_1',
         'request_voucher_2',
         'request_plan',
         'date_stamp',
-        'ci_cost_center_receiver',
-        'ci_warehouse_dispatcher',        
-        'order_warehouse_inventory',
-        'order_cost_center_inventory',
+        'warehouse_dispatcher',
+        'cost_center_receiver',
+        'warehouse_inventory',
+        'cost_center_inventory',
     )
     search_fields = (
         'voucher',
@@ -215,10 +215,10 @@ class DeliveryModel(admin.ModelAdmin):
         'request_voucher_2',
         'request_plan',
         'date_stamp',
-        'ci_cost_center_receiver',
-        'ci_warehouse_dispatcher',        
-        'order_warehouse_inventory',
-        'order_cost_center_inventory',
+        'warehouse_dispatcher',
+        'cost_center_receiver',
+        'warehouse_inventory',
+        'cost_center_inventory',
     )
     list_per_page = 10
 @admin.register(DeliveryListSC208)
@@ -227,19 +227,19 @@ class DeliveryListModel(admin.ModelAdmin):
         'existence',
     )
     list_display = (
-        'delivery_voucher',
-        'order_product',
+        'delivery',
+        'product',
         'quantity',
         'existence'
     )
     list_filter = (
-        'order_product',
+        'product',
         'quantity',
         'existence'
     )
     search_fields = (
-        'delivery_voucher',
-        'order_product',
+        'delivery',
+        'product',
         'quantity',
         'existence'
     )

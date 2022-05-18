@@ -31,6 +31,7 @@ class Product(models.Model):
 class Provider(models.Model):
     code = models.IntegerField(primary_key=True)
     name = models.CharField(null=False, max_length=50)
+    products = models.ManyToManyField(Product, through='ProviderInventory')
     
     class Meta:
         db_table = 'api_provider'
@@ -42,14 +43,14 @@ class Provider(models.Model):
 
 
 class ProviderInventory(Inventory):
-    code_provider = models.ForeignKey(Provider, on_delete=models.CASCADE)
-    code_product = models.ForeignKey(Product, on_delete=models.CASCADE)    
+    provider = models.ForeignKey(Provider, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)    
 
     class Meta:
         db_table = 'api_provider_inventory'
         verbose_name = "Provider Inventory"
         verbose_name_plural = "Provider Inventories"
-        unique_together = (('code_provider', 'code_product'),)
+        unique_together = (('provider', 'product'),)
         
     def __str__(self):
         return str(self.pk)
@@ -61,7 +62,8 @@ class ProviderInventory(Inventory):
 
 class Warehouse(models.Model):
     code = models.IntegerField(primary_key=True)
-    name = models.CharField(null=False, max_length=50)    
+    name = models.CharField(null=False, max_length=50)
+    products = models.ManyToManyField(Product, through='WarehouseInventory')
     
     class Meta:
         db_table = 'api_warehouse'
@@ -73,14 +75,14 @@ class Warehouse(models.Model):
 
 
 class WarehouseInventory(Inventory):
-    code_warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
-    code_product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     
     class Meta:
         db_table = 'api_warehouse_inventory'
         verbose_name = "Warehouse Inventory"
         verbose_name_plural = "Warehouse Inventories"
-        unique_together = (('code_warehouse', 'code_product'),)
+        unique_together = (('warehouse', 'product'),)
 
     def __str__(self):
         return str(self.pk)
@@ -106,7 +108,8 @@ class Unit(models.Model):
 class CostCenter(models.Model):
     code = models.IntegerField(primary_key=True)
     name = models.CharField(null=False, max_length=50)
-    code_unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
+    products = models.ManyToManyField(Product, through='CostCenterInventory')
 
     class Meta:
         db_table = 'api_cost_center'
@@ -118,14 +121,14 @@ class CostCenter(models.Model):
     
 
 class CostCenterInventory(Inventory):
-    code_cost_center = models.ForeignKey(CostCenter, on_delete=models.CASCADE)
-    code_product = models.ForeignKey(Product, on_delete=models.CASCADE)    
+    cost_center = models.ForeignKey(CostCenter, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)    
     
     class Meta:
         db_table = 'api_cost_center_inventory'
         verbose_name = "Cost Center Inventory"
         verbose_name_plural = "Cost Center Inventories"
-        unique_together = (('code_cost_center', 'code_product'),)
+        unique_together = (('cost_center', 'product'),)
 
     def __str__(self):
         return str(self.pk)
@@ -138,7 +141,7 @@ class CostCenterInventory(Inventory):
 class Order(models.Model):    
     quantity = models.DecimalField(max_digits=10, decimal_places=4)
     existence = models.DecimalField(max_digits=10, decimal_places=4, null=True)
-    order_product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
 
     class Meta:
         abstract = True
@@ -149,11 +152,11 @@ class DeliverySC208(models.Model):
     request_voucher_1 = models.IntegerField(null=False)
     request_voucher_2 = models.IntegerField(null=False)
     request_plan = models.IntegerField(null=False)    
-    date_stamp = models.DateField(auto_now=True, editable=False)    
-    ci_cost_center_receiver = models.DecimalField(max_digits=11, decimal_places=0, null=False)
-    ci_warehouse_dispatcher = models.DecimalField(max_digits=11, decimal_places=0, null=False)
-    order_warehouse_inventory = models.ForeignKey(WarehouseInventory, on_delete=models.CASCADE)   
-    order_cost_center_inventory = models.ForeignKey(CostCenterInventory, on_delete=models.CASCADE)
+    date_stamp = models.DateField(auto_now=True, editable=False)
+    warehouse_dispatcher = models.DecimalField(max_digits=11, decimal_places=0, null=False)
+    cost_center_receiver = models.DecimalField(max_digits=11, decimal_places=0, null=False)    
+    warehouse_inventory = models.ForeignKey(WarehouseInventory, on_delete=models.CASCADE)   
+    cost_center_inventory = models.ForeignKey(CostCenterInventory, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'api_delivery_sc_2_08'
@@ -165,21 +168,21 @@ class DeliverySC208(models.Model):
     
     
 class DeliveryListSC208(Order):
-    delivery_voucher = models.ForeignKey(DeliverySC208, on_delete=models.CASCADE)
+    delivery = models.ForeignKey(DeliverySC208, on_delete=models.CASCADE)
     
     class Meta:
         db_table = 'api_delivery_list_sc_2_08'
         verbose_name = "Delivery List SC-2-08"
         verbose_name_plural = "Delivery Lists SC-2-08"
-        unique_together = (('delivery_voucher', 'order_product'),)    
+        unique_together = (('delivery', 'product'),)    
         
-    def clean(self):        
-        warehouse_inventory_obj = DeliverySC208.objects.get(voucher = self.delivery_voucher.voucher).order_warehouse_inventory
-        cost_center_inventory_id = DeliverySC208.objects.get(voucher = self.delivery_voucher.voucher).order_cost_center_inventory
+    def clean(self):
+        warehouse_inventory = DeliverySC208.objects.get(voucher = self.delivery.voucher).warehouse_inventory
+        cost_center_inventory = DeliverySC208.objects.get(voucher = self.delivery.voucher).cost_center_inventory
         #warehouse_inventory_obj = WarehouseInventory.objects.filter(pk=warehouse_inventory_id)
         #cost_center_inventory_obj = CostCenterInventory.objects.filter(pk=cost_center_inventory_id)
         
-        if warehouse_inventory_obj.quantity is None or warehouse_inventory_obj.quantity < self.quantity:
+        if warehouse_inventory.quantity is None or warehouse_inventory.quantity < self.quantity:
             raise ValidationError({'quantity': 'deliver quantity must be less or equal to stored quantity'})
      
     def __str__(self):
@@ -189,10 +192,10 @@ class DeliveryListSC208(Order):
 class DevolutionSC208(models.Model):
     voucher = models.AutoField(primary_key=True, unique_for_year="date_stamp", editable=False)
     date_stamp = models.DateField(auto_now=True, editable=False)
-    ci_cost_center_dispatcher = models.DecimalField(max_digits=11, decimal_places=0, null=False)
-    ci_warehouse_receiver = models.DecimalField(max_digits=11, decimal_places=0, null=False)
-    order_warehouse_inventory = models.ForeignKey(WarehouseInventory, on_delete=models.CASCADE)
-    order_cost_center_inventory = models.ForeignKey(CostCenterInventory, on_delete=models.CASCADE)
+    warehouse_receiver = models.DecimalField(max_digits=11, decimal_places=0, null=False)
+    cost_center_dispatcher = models.DecimalField(max_digits=11, decimal_places=0, null=False)
+    warehouse_inventory = models.ForeignKey(WarehouseInventory, on_delete=models.CASCADE)
+    cost_center_inventory = models.ForeignKey(CostCenterInventory, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'api_devolution_sc_2_08'
@@ -204,13 +207,13 @@ class DevolutionSC208(models.Model):
 
 
 class DevolutionListSC208(Order):
-    devolution_voucher = models.ForeignKey(DevolutionSC208, on_delete=models.CASCADE)    
+    devolution = models.ForeignKey(DevolutionSC208, on_delete=models.CASCADE)    
     
     class Meta:
         db_table = 'api_devolution_list_sc_2_08'
         verbose_name = "Devolution List SC-2-08"
         verbose_name_plural = "Devolution Lists SC-2-08"
-        unique_together = (('devolution_voucher', 'order_product'),)
+        unique_together = (('devolution', 'product'),)
         
     def __str__(self):
         return str(self.pk)
@@ -220,9 +223,9 @@ class AdjustSC216(models.Model):
     voucher = models.AutoField(primary_key=True, unique_for_year="date_stamp", editable=False)
     date_stamp = models.DateField(auto_now=True, editable=False)
     concept = models.CharField(null=False, max_length=255)
-    ci_store_manager = models.DecimalField(max_digits=11, decimal_places=0, null=False)
-    ci_inventory_manager = models.DecimalField(max_digits=11, decimal_places=0, null=False)
-    order_warehouse_inventory = models.ForeignKey(WarehouseInventory, on_delete=models.CASCADE)
+    store_manager = models.DecimalField(max_digits=11, decimal_places=0, null=False)
+    inventory_manager = models.DecimalField(max_digits=11, decimal_places=0, null=False)
+    warehouse_inventory = models.ForeignKey(WarehouseInventory, on_delete=models.CASCADE)
     
     class Meta:
         db_table = 'api_adjust_sc_2_16'
@@ -234,13 +237,13 @@ class AdjustSC216(models.Model):
     
 
 class AdjustListSC216(Order):
-    adjust_voucher = models.ForeignKey(AdjustSC216, on_delete=models.CASCADE)    
+    adjust = models.ForeignKey(AdjustSC216, on_delete=models.CASCADE)    
     
     class Meta:
         db_table = 'api_adjust_list_sc_2_16'
         verbose_name = "Adjust List SC-2-16"
         verbose_name_plural = "Adjust Lists SC-2-16"
-        unique_together = (('adjust_voucher', 'order_product'),)
+        unique_together = (('adjust', 'product'),)
         
     def __str__(self):
         return str(self.pk)
@@ -250,11 +253,11 @@ class ReceptionSC204(models.Model):
     voucher = models.AutoField(primary_key=True, unique_for_year="date_stamp", editable=False)
     date_stamp = models.DateField(auto_now=True, editable=False)
     bill_number = models.CharField(null=False, max_length=255)
-    ci_warehouse_receiver = models.DecimalField(max_digits=11, decimal_places=0, null=False)
-    ci_store_manager = models.DecimalField(max_digits=11, decimal_places=0, null=False)
-    ci_driver = models.DecimalField(max_digits=11, decimal_places=0, null=False)
-    order_warehouse_inventory = models.ForeignKey(WarehouseInventory, on_delete=models.CASCADE)
-    order_provider_inventory = models.ForeignKey(ProviderInventory, on_delete=models.CASCADE)
+    warehouse_receiver = models.DecimalField(max_digits=11, decimal_places=0, null=False)
+    store_manager = models.DecimalField(max_digits=11, decimal_places=0, null=False)
+    driver = models.DecimalField(max_digits=11, decimal_places=0, null=False)
+    warehouse_inventory = models.ForeignKey(WarehouseInventory, on_delete=models.CASCADE)
+    provider_inventory = models.ForeignKey(ProviderInventory, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'api_reception_sc_2_04'
@@ -266,13 +269,13 @@ class ReceptionSC204(models.Model):
     
 
 class ReceptionListSC204(Order):
-    reception_voucher = models.ForeignKey(ReceptionSC204, on_delete=models.CASCADE)    
+    reception = models.ForeignKey(ReceptionSC204, on_delete=models.CASCADE)    
     
     class Meta:
         db_table = 'api_reception_list_sc_2_04'
         verbose_name = "Reception List SC-2-04"
         verbose_name_plural = "Recepton Lists SC-2-04"
-        unique_together = (('reception_voucher', 'order_product'),)
+        unique_together = (('reception', 'product'),)
         
     def __str__(self):
         return (self.pk)
