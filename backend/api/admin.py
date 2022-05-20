@@ -2,8 +2,18 @@ from django.contrib import admin
 from .models import *
 
 
+admin.site.site_header = "ICRT Radio Warehouse Administration"
+admin.site.site_title = "ICRT"
+admin.site.index_title = "Administration"
+
+
 @admin.register(Product)
 class ProductModel(admin.ModelAdmin):
+    fields = (
+        ('code', 'account', 'account_sub'),
+        'description',
+        ('unit', 'price')
+    )
     list_display = (
         'code',
         'account',
@@ -24,10 +34,11 @@ class ProductModel(admin.ModelAdmin):
         'account',
         'account_sub',
         'description',
-        'unit',
-        'price'
     )
-    list_per_page = 10
+    ordering = (
+        'code',
+    )
+    list_per_page = 10   
 
 
 # Enterprise ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -37,13 +48,9 @@ class ProviderModel(admin.ModelAdmin):
     list_display = (
         'code',
         'name'
-    )
-    list_filter = (
-        'name',
-    )
-    search_fields = (
+    )    
+    ordering = (
         'code',
-        'name'
     )
     list_per_page = 10
 
@@ -58,12 +65,8 @@ class WarehouseModel(admin.ModelAdmin):
         'code',
         'name'
     )
-    list_filter = (
-        'name',
-    )
-    search_fields = (
+    ordering = (
         'code',
-        'name'
     )
     list_per_page = 10
 
@@ -82,11 +85,9 @@ class WarehouseInventoryModel(admin.ModelAdmin):
     )    
     readonly_fields = (
         'quantity',
-    )
-    search_fields = (
+    )    
+    ordering = (
         'warehouse',
-        'product',
-        'quantity'
     )
     list_per_page = 10
 
@@ -100,13 +101,9 @@ class UnitModel(admin.ModelAdmin):
     list_display = (
         'code',
         'name'
-    )
-    list_filter = (
-        'name',
-    )
-    search_fields = (
+    )    
+    ordering = (
         'code',
-        'name'
     )
     list_per_page = 10
 
@@ -117,14 +114,9 @@ class CostCenterModel(admin.ModelAdmin):
         'code',
         'name',
         'unit'
-    )
-    list_filter = (
-        'name',
-    )
-    search_fields = (
+    )    
+    ordering = (
         'code',
-        'name',
-        'unit'
     )
     list_per_page = 10
 
@@ -143,12 +135,9 @@ class CostCenterInventoryModel(admin.ModelAdmin):
         'cost_center',
         'product',
         'quantity',
-    )
-    search_fields = (
-        'pk',
+    )    
+    ordering = (
         'cost_center',
-        'product',
-        'quantity'
     )
     list_per_page = 10
     
@@ -183,17 +172,9 @@ class DeliveryModel(admin.ModelAdmin):
         'cost_center_receiver',
         'warehouse',
         'cost_center',
-    )
-    search_fields = (
+    )    
+    ordering = (
         'voucher',
-        'request_voucher_1',
-        'request_voucher_2',
-        'request_plan',
-        'date_stamp',
-        'warehouse_dispatcher',
-        'cost_center_receiver',
-        'warehouse',
-        'cost_center',
     )
     list_per_page = 10
     
@@ -213,12 +194,9 @@ class DeliveryListModel(admin.ModelAdmin):
         'product',
         'quantity',
         'existence'
-    )
-    search_fields = (
+    )    
+    ordering = (
         'delivery',
-        'product',
-        'quantity',
-        'existence'
     )
     list_per_page = 10    
     
@@ -243,14 +221,9 @@ class DvolutionModel(admin.ModelAdmin):
         'cost_center_dispatcher',        
         'warehouse',
         'cost_center',
-    )
-    search_fields = (
+    )    
+    ordering = (
         'voucher',
-        'date_stamp',
-        'warehouse_receiver',
-        'cost_center_dispatcher',
-        'warehouse',
-        'cost_center',
     )
     list_per_page = 10
     
@@ -270,12 +243,9 @@ class DevolutionListModel(admin.ModelAdmin):
         'product',
         'quantity',
         'existence'
-    )
-    search_fields = (
+    )    
+    ordering = (
         'devolution',
-        'product',
-        'quantity',
-        'existence'
     )
     list_per_page = 10    
     
@@ -301,13 +271,8 @@ class AdjustModel(admin.ModelAdmin):
         'inventory_manager',
         'warehouse',
     )
-    search_fields = (
+    ordering = (
         'voucher',
-        'date_stamp',
-        'concept',
-        'store_manager',
-        'inventory_manager',
-        'warehouse',
     )
     list_per_page = 10
     
@@ -327,12 +292,9 @@ class AdjustListModel(admin.ModelAdmin):
         'product',
         'quantity',
         'existence'
-    )
-    search_fields = (
+    )    
+    ordering = (
         'adjust',
-        'product',
-        'quantity',
-        'existence'
     )
     list_per_page = 10
     
@@ -360,14 +322,8 @@ class ReceptionModel(admin.ModelAdmin):
         'warehouse',
         'provider',
     )
-    search_fields = (
+    ordering = (
         'voucher',
-        'date_stamp',
-        'bill_number',
-        'warehouse_receiver',
-        'store_manager',        
-        'warehouse',
-        'provider',
     )
     list_per_page = 10
     
@@ -388,11 +344,8 @@ class ReceptionListModel(admin.ModelAdmin):
         'quantity',
         'existence'
     )
-    search_fields = (
+    ordering = (
         'reception',
-        'product',
-        'quantity',
-        'existence'
     )
     list_per_page = 10
     

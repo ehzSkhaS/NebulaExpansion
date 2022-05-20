@@ -1,4 +1,3 @@
-from itertools import product
 from django.db import models
 from django.core.exceptions import ValidationError
 
@@ -21,7 +20,7 @@ class Product(models.Model):
     class Meta:
         db_table = 'api_product'
         verbose_name = "Product"
-        verbose_name_plural = "Products"        
+        verbose_name_plural = "Products"
 
     def __str__(self):
         return str(self.code)
@@ -67,7 +66,7 @@ class WarehouseInventory(Inventory):
     class Meta:
         db_table = 'api_warehouse_inventory'
         verbose_name = "Warehouse Inventory"
-        verbose_name_plural = "Warehouse Inventories"
+        verbose_name_plural = "Warehouses Inventories"
         unique_together = (('warehouse', 'product'),)
 
     def __str__(self):
@@ -113,7 +112,7 @@ class CostCenterInventory(Inventory):
     class Meta:
         db_table = 'api_cost_center_inventory'
         verbose_name = "Cost Center Inventory"
-        verbose_name_plural = "Cost Center Inventories"
+        verbose_name_plural = "Cost Centers Inventories"
         unique_together = (('cost_center', 'product'),)
 
     def __str__(self):
@@ -139,15 +138,15 @@ class DeliverySC208(models.Model):
     request_voucher_2 = models.IntegerField(null=False)
     request_plan = models.IntegerField(null=False)    
     date_stamp = models.DateField(auto_now=True, editable=False)
-    warehouse_dispatcher = models.DecimalField(max_digits=11, decimal_places=0, null=False)
-    cost_center_receiver = models.DecimalField(max_digits=11, decimal_places=0, null=False)    
+    warehouse_dispatcher = models.DecimalField(max_digits=11, decimal_places=0)
+    cost_center_receiver = models.DecimalField(max_digits=11, decimal_places=0)    
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)   
     cost_center = models.ForeignKey(CostCenter, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'api_delivery_sc_2_08'
         verbose_name = "Delivery SC-2-08"
-        verbose_name_plural = "Deliveries SC-2-08"
+        verbose_name_plural = "Orders Delivery SC-2-08"
 
     def __str__(self):
         return str(self.voucher)
@@ -159,7 +158,7 @@ class DeliveryListSC208(Order):
     class Meta:
         db_table = 'api_delivery_list_sc_2_08'
         verbose_name = "Delivery List SC-2-08"
-        verbose_name_plural = "Delivery Lists SC-2-08"
+        verbose_name_plural = "Orders Delivery SC-2-08 Lists"
         unique_together = (('delivery', 'product'),)
         
     def __str__(self):
@@ -219,15 +218,15 @@ class DeliveryListSC208(Order):
 class DevolutionSC208(models.Model):
     voucher = models.AutoField(primary_key=True, unique_for_year="date_stamp", editable=False)
     date_stamp = models.DateField(auto_now=True, editable=False)
-    warehouse_receiver = models.DecimalField(max_digits=11, decimal_places=0, null=False)
-    cost_center_dispatcher = models.DecimalField(max_digits=11, decimal_places=0, null=False)
+    warehouse_receiver = models.DecimalField(max_digits=11, decimal_places=0)
+    cost_center_dispatcher = models.DecimalField(max_digits=11, decimal_places=0)
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
     cost_center = models.ForeignKey(CostCenter, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'api_devolution_sc_2_08'
         verbose_name = "Devolution SC-2-08"
-        verbose_name_plural = "Devolutions SC-2-08"
+        verbose_name_plural = "Orders Devolution SC-2-08"
 
     def __str__(self):
         return str(self.voucher)
@@ -239,7 +238,7 @@ class DevolutionListSC208(Order):
     class Meta:
         db_table = 'api_devolution_list_sc_2_08'
         verbose_name = "Devolution List SC-2-08"
-        verbose_name_plural = "Devolution Lists SC-2-08"
+        verbose_name_plural = "Orders Devolution SC-2-08 Lists"
         unique_together = (('devolution', 'product'),)
         
     def __str__(self):
@@ -287,14 +286,14 @@ class AdjustSC216(models.Model):
     voucher = models.AutoField(primary_key=True, unique_for_year="date_stamp", editable=False)
     date_stamp = models.DateField(auto_now=True, editable=False)
     concept = models.CharField(null=False, max_length=255)
-    store_manager = models.DecimalField(max_digits=11, decimal_places=0, null=False)
-    inventory_manager = models.DecimalField(max_digits=11, decimal_places=0, null=False)
+    store_manager = models.DecimalField(max_digits=11, decimal_places=0)
+    inventory_manager = models.DecimalField(max_digits=11, decimal_places=0)
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
     
     class Meta:
         db_table = 'api_adjust_sc_2_16'
         verbose_name = "Adjust SC-2-16"
-        verbose_name_plural = "Adjusts SC-2-16"
+        verbose_name_plural = "Orders Adjust SC-2-16"
 
     def __str__(self):
         return str(self.voucher)
@@ -306,7 +305,7 @@ class AdjustListSC216(Order):
     class Meta:
         db_table = 'api_adjust_list_sc_2_16'
         verbose_name = "Adjust List SC-2-16"
-        verbose_name_plural = "Adjust Lists SC-2-16"
+        verbose_name_plural = "Orders Adjust SC-2-16 Lists"
         unique_together = (('adjust', 'product'),)
         
     def __str__(self):
@@ -340,16 +339,16 @@ class ReceptionSC204(models.Model):
     voucher = models.AutoField(primary_key=True, unique_for_year="date_stamp", editable=False)
     date_stamp = models.DateField(auto_now=True, editable=False)
     bill_number = models.CharField(null=False, max_length=255)
-    warehouse_receiver = models.DecimalField(max_digits=11, decimal_places=0, null=False)
-    store_manager = models.DecimalField(max_digits=11, decimal_places=0, null=False)
-    driver = models.DecimalField(max_digits=11, decimal_places=0, null=False)
+    warehouse_receiver = models.DecimalField(max_digits=11, decimal_places=0)
+    store_manager = models.DecimalField(max_digits=11, decimal_places=0)
+    driver = models.DecimalField(max_digits=11, decimal_places=0)
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
     provider = models.ForeignKey(Provider, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'api_reception_sc_2_04'
         verbose_name = "Reception SC-2-04"
-        verbose_name_plural = "Receptions SC-2-04"
+        verbose_name_plural = "Orders Reception SC-2-04"
 
     def __str__(self):
         return str(self.voucher)
@@ -361,7 +360,7 @@ class ReceptionListSC204(Order):
     class Meta:
         db_table = 'api_reception_list_sc_2_04'
         verbose_name = "Reception List SC-2-04"
-        verbose_name_plural = "Recepton Lists SC-2-04"
+        verbose_name_plural = "Orders Reception SC-2-04 Lists"
         unique_together = (('reception', 'product'),)
         
     def __str__(self):
