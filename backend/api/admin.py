@@ -47,28 +47,6 @@ class ProviderModel(admin.ModelAdmin):
     )
     list_per_page = 10
 
-    
-@admin.register(ProviderInventory)
-class ProviderInventoryModel(admin.ModelAdmin):
-    list_display = (
-        'pk',
-        'provider',
-        'product',
-        'quantity'
-    )
-    list_filter = (
-        'provider',
-        'product',
-        'quantity'
-    )
-    search_fields = (
-        'pk',
-        'provider',
-        'product',
-        'quantity'
-    )
-    list_per_page = 10
-
 # Enterprise End --------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -93,7 +71,6 @@ class WarehouseModel(admin.ModelAdmin):
 @admin.register(WarehouseInventory)
 class WarehouseInventoryModel(admin.ModelAdmin):
     list_display = (
-        'pk',
         'warehouse',
         'product',
         'quantity'
@@ -107,7 +84,6 @@ class WarehouseInventoryModel(admin.ModelAdmin):
         'quantity',
     )
     search_fields = (
-        'pk',
         'warehouse',
         'product',
         'quantity'
@@ -159,7 +135,6 @@ class CostCenterInventoryModel(admin.ModelAdmin):
         'quantity',
     )
     list_display = (
-        'pk',
         'cost_center',
         'product',
         'quantity',
@@ -196,8 +171,8 @@ class DeliveryModel(admin.ModelAdmin):
         'date_stamp',
         'warehouse_dispatcher',
         'cost_center_receiver',        
-        'warehouse_inventory',
-        'cost_center_inventory',
+        'warehouse',
+        'cost_center',
     )
     list_filter = (
         'request_voucher_1',
@@ -206,8 +181,8 @@ class DeliveryModel(admin.ModelAdmin):
         'date_stamp',
         'warehouse_dispatcher',
         'cost_center_receiver',
-        'warehouse_inventory',
-        'cost_center_inventory',
+        'warehouse',
+        'cost_center',
     )
     search_fields = (
         'voucher',
@@ -217,10 +192,12 @@ class DeliveryModel(admin.ModelAdmin):
         'date_stamp',
         'warehouse_dispatcher',
         'cost_center_receiver',
-        'warehouse_inventory',
-        'cost_center_inventory',
+        'warehouse',
+        'cost_center',
     )
     list_per_page = 10
+    
+    
 @admin.register(DeliveryListSC208)
 class DeliveryListModel(admin.ModelAdmin):
     readonly_fields = (
@@ -243,6 +220,183 @@ class DeliveryListModel(admin.ModelAdmin):
         'quantity',
         'existence'
     )
+    list_per_page = 10    
+    
+    
+@admin.register(DevolutionSC208)
+class DvolutionModel(admin.ModelAdmin):
+    readonly_fields = (
+        'voucher',
+        'date_stamp',
+    )
+    list_display = (
+        'voucher',
+        'date_stamp',
+        'warehouse_receiver',
+        'cost_center_dispatcher',        
+        'warehouse',
+        'cost_center',
+    )
+    list_filter = (
+        'date_stamp',
+        'warehouse_receiver',
+        'cost_center_dispatcher',        
+        'warehouse',
+        'cost_center',
+    )
+    search_fields = (
+        'voucher',
+        'date_stamp',
+        'warehouse_receiver',
+        'cost_center_dispatcher',
+        'warehouse',
+        'cost_center',
+    )
     list_per_page = 10
+    
+    
+@admin.register(DevolutionListSC208)
+class DevolutionListModel(admin.ModelAdmin):
+    readonly_fields = (
+        'existence',
+    )
+    list_display = (
+        'devolution',
+        'product',
+        'quantity',
+        'existence'
+    )
+    list_filter = (
+        'product',
+        'quantity',
+        'existence'
+    )
+    search_fields = (
+        'devolution',
+        'product',
+        'quantity',
+        'existence'
+    )
+    list_per_page = 10    
+    
+    
+@admin.register(AdjustSC216)
+class AdjustModel(admin.ModelAdmin):
+    readonly_fields = (
+        'voucher',
+        'date_stamp',
+    )
+    list_display = (
+        'voucher',
+        'date_stamp',
+        'concept',
+        'store_manager',
+        'inventory_manager',
+        'warehouse',
+    )
+    list_filter = (
+        'date_stamp',
+        'concept',
+        'store_manager',
+        'inventory_manager',
+        'warehouse',
+    )
+    search_fields = (
+        'voucher',
+        'date_stamp',
+        'concept',
+        'store_manager',
+        'inventory_manager',
+        'warehouse',
+    )
+    list_per_page = 10
+    
+    
+@admin.register(AdjustListSC216)
+class AdjustListModel(admin.ModelAdmin):
+    readonly_fields = (
+        'existence',
+    )
+    list_display = (
+        'adjust',
+        'product',
+        'quantity',
+        'existence'
+    )
+    list_filter = (
+        'product',
+        'quantity',
+        'existence'
+    )
+    search_fields = (
+        'adjust',
+        'product',
+        'quantity',
+        'existence'
+    )
+    list_per_page = 10
+    
+
+@admin.register(ReceptionSC204)
+class ReceptionModel(admin.ModelAdmin):
+    readonly_fields = (
+        'voucher',
+        'date_stamp',
+    )
+    list_display = (
+        'voucher',
+        'date_stamp',
+        'bill_number',
+        'warehouse_receiver',
+        'store_manager',        
+        'warehouse',
+        'provider',
+    )
+    list_filter = (
+        'date_stamp',
+        'bill_number',
+        'warehouse_receiver',
+        'store_manager',        
+        'warehouse',
+        'provider',
+    )
+    search_fields = (
+        'voucher',
+        'date_stamp',
+        'bill_number',
+        'warehouse_receiver',
+        'store_manager',        
+        'warehouse',
+        'provider',
+    )
+    list_per_page = 10
+    
+    
+@admin.register(ReceptionListSC204)
+class ReceptionListModel(admin.ModelAdmin):
+    readonly_fields = (
+        'existence',
+    )
+    list_display = (
+        'reception',
+        'product',
+        'quantity',
+        'existence'
+    )
+    list_filter = (
+        'product',
+        'quantity',
+        'existence'
+    )
+    search_fields = (
+        'reception',
+        'product',
+        'quantity',
+        'existence'
+    )
+    list_per_page = 10
+    
+    
+
    
 # Operations End --------------------------------------------------------------------------------------------------------------------------------------------

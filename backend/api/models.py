@@ -1,9 +1,10 @@
+from itertools import product
 from django.db import models
 from django.core.exceptions import ValidationError
 
 
 class Inventory(models.Model):
-    quantity = models.DecimalField(max_digits=10, decimal_places=4, null=True)
+    quantity = models.DecimalField(max_digits=10, decimal_places=4, default=0)
     
     class Meta:
         abstract = True
@@ -31,7 +32,6 @@ class Product(models.Model):
 class Provider(models.Model):
     code = models.IntegerField(primary_key=True)
     name = models.CharField(null=False, max_length=50)
-    products = models.ManyToManyField(Product, through='ProviderInventory')
     
     class Meta:
         db_table = 'api_provider'
@@ -40,20 +40,6 @@ class Provider(models.Model):
 
     def __str__(self):
         return str(self.code)
-
-
-class ProviderInventory(Inventory):
-    provider = models.ForeignKey(Provider, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)    
-
-    class Meta:
-        db_table = 'api_provider_inventory'
-        verbose_name = "Provider Inventory"
-        verbose_name_plural = "Provider Inventories"
-        unique_together = (('provider', 'product'),)
-        
-    def __str__(self):
-        return str(self.pk)
     
 # Enterprise End --------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -140,7 +126,7 @@ class CostCenterInventory(Inventory):
 
 class Order(models.Model):    
     quantity = models.DecimalField(max_digits=10, decimal_places=4)
-    existence = models.DecimalField(max_digits=10, decimal_places=4, null=True)
+    existence = models.DecimalField(max_digits=10, decimal_places=4, default=0)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
 
     class Meta:
@@ -155,8 +141,8 @@ class DeliverySC208(models.Model):
     date_stamp = models.DateField(auto_now=True, editable=False)
     warehouse_dispatcher = models.DecimalField(max_digits=11, decimal_places=0, null=False)
     cost_center_receiver = models.DecimalField(max_digits=11, decimal_places=0, null=False)    
-    warehouse_inventory = models.ForeignKey(WarehouseInventory, on_delete=models.CASCADE)   
-    cost_center_inventory = models.ForeignKey(CostCenterInventory, on_delete=models.CASCADE)
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)   
+    cost_center = models.ForeignKey(CostCenter, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'api_delivery_sc_2_08'
@@ -174,28 +160,69 @@ class DeliveryListSC208(Order):
         db_table = 'api_delivery_list_sc_2_08'
         verbose_name = "Delivery List SC-2-08"
         verbose_name_plural = "Delivery Lists SC-2-08"
-        unique_together = (('delivery', 'product'),)    
+        unique_together = (('delivery', 'product'),)
         
-    def clean(self):
-        warehouse_inventory = DeliverySC208.objects.get(voucher = self.delivery.voucher).warehouse_inventory
-        cost_center_inventory = DeliverySC208.objects.get(voucher = self.delivery.voucher).cost_center_inventory
-        #warehouse_inventory_obj = WarehouseInventory.objects.filter(pk=warehouse_inventory_id)
-        #cost_center_inventory_obj = CostCenterInventory.objects.filter(pk=cost_center_inventory_id)
-        
-        if warehouse_inventory.quantity is None or warehouse_inventory.quantity < self.quantity:
-            raise ValidationError({'quantity': 'deliver quantity must be less or equal to stored quantity'})
-     
     def __str__(self):
         return str(self.pk)
-    
+        
+    def clean(self):
+        warehouse = DeliverySC208.objects.get(
+            voucher = self.delivery.voucher
+        ).warehouse
+        cost_center = DeliverySC208.objects.get(
+            voucher = self.delivery.voucher
+        ).cost_center
+        
+        def validate_quantity():
+            quantity_w = WarehouseInventory.objects.get(
+                product = self.product,
+                warehouse = warehouse
+            ).quantity            
+            
+            if quantity_w >= self.quantity :
+                self.existence = quantity_w
+            
+                WarehouseInventory.objects.update(
+                    product = self.product,
+                    warehouse = warehouse,
+                    quantity = quantity_w - self.quantity
+                )
+                
+                exists = CostCenterInventory.objects.filter(
+                    product=self.product,
+                    cost_center=cost_center
+                ).exists()
+                
+                if exists:
+                    quantity_cc = CostCenterInventory.objects.get(
+                        product = self.product,
+                        cost_center = cost_center
+                    ).quantity
+                    
+                    CostCenterInventory.objects.update(
+                        product = self.product,
+                        cost_center = cost_center,
+                        quantity = quantity_cc + self.quantity
+                    )
+                else:
+                    CostCenterInventory.objects.create(
+                        product=self.product,
+                        cost_center=cost_center,
+                        quantity=self.quantity
+                    )
+            else :
+                raise ValidationError({'quantity': 'delivery quantity must be less or equal to stored quantity'})
+        
+        validate_quantity()
+     
     
 class DevolutionSC208(models.Model):
     voucher = models.AutoField(primary_key=True, unique_for_year="date_stamp", editable=False)
     date_stamp = models.DateField(auto_now=True, editable=False)
     warehouse_receiver = models.DecimalField(max_digits=11, decimal_places=0, null=False)
     cost_center_dispatcher = models.DecimalField(max_digits=11, decimal_places=0, null=False)
-    warehouse_inventory = models.ForeignKey(WarehouseInventory, on_delete=models.CASCADE)
-    cost_center_inventory = models.ForeignKey(CostCenterInventory, on_delete=models.CASCADE)
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
+    cost_center = models.ForeignKey(CostCenter, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'api_devolution_sc_2_08'
@@ -218,6 +245,43 @@ class DevolutionListSC208(Order):
     def __str__(self):
         return str(self.pk)
     
+    def clean(self):
+        warehouse = DevolutionSC208.objects.get(
+            voucher = self.devolution.voucher
+        ).warehouse
+        cost_center = DevolutionSC208.objects.get(
+            voucher = self.devolution.voucher
+        ).cost_center
+        
+        def validate_quantity():
+            quantity_w = WarehouseInventory.objects.get(
+                product = self.product,
+                warehouse = warehouse
+            ).quantity            
+            quantity_cc = CostCenterInventory.objects.get(
+                product = self.product,
+                cost_center = cost_center
+            ).quantity
+            
+            if quantity_cc >= self.quantity :
+                self.existence = quantity_w
+            
+                WarehouseInventory.objects.update(
+                    product = self.product,
+                    warehouse = warehouse,
+                    quantity = quantity_w + self.quantity
+                )
+                
+                CostCenterInventory.objects.update(
+                    product = self.product,
+                    cost_center = cost_center,
+                    quantity = quantity_cc - self.quantity
+                )
+            else :
+                raise ValidationError({'quantity': 'devolution quantity must be less or equal to stored quantity'})
+        
+        validate_quantity()
+    
     
 class AdjustSC216(models.Model):
     voucher = models.AutoField(primary_key=True, unique_for_year="date_stamp", editable=False)
@@ -225,7 +289,7 @@ class AdjustSC216(models.Model):
     concept = models.CharField(null=False, max_length=255)
     store_manager = models.DecimalField(max_digits=11, decimal_places=0, null=False)
     inventory_manager = models.DecimalField(max_digits=11, decimal_places=0, null=False)
-    warehouse_inventory = models.ForeignKey(WarehouseInventory, on_delete=models.CASCADE)
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
     
     class Meta:
         db_table = 'api_adjust_sc_2_16'
@@ -247,7 +311,30 @@ class AdjustListSC216(Order):
         
     def __str__(self):
         return str(self.pk)
-
+    
+    def clean(self):
+        warehouse = AdjustSC216.objects.get(
+            voucher = self.adjust.voucher
+        ).warehouse
+        
+        def validate_quantity():
+            quantity = WarehouseInventory.objects.get(
+                product = self.product,
+                warehouse = warehouse
+            ).quantity
+            
+            if quantity >= self.quantity or self.quantity < 0:
+                self.existence = quantity
+            
+                WarehouseInventory.objects.update(
+                    product = self.product,
+                    warehouse = warehouse,
+                    quantity = self.existence - self.quantity
+                )
+            else :
+                raise ValidationError({'quantity': 'adjust quantity must be less or equal to stored quantity'})
+        
+        validate_quantity()
 
 class ReceptionSC204(models.Model):
     voucher = models.AutoField(primary_key=True, unique_for_year="date_stamp", editable=False)
@@ -256,8 +343,8 @@ class ReceptionSC204(models.Model):
     warehouse_receiver = models.DecimalField(max_digits=11, decimal_places=0, null=False)
     store_manager = models.DecimalField(max_digits=11, decimal_places=0, null=False)
     driver = models.DecimalField(max_digits=11, decimal_places=0, null=False)
-    warehouse_inventory = models.ForeignKey(WarehouseInventory, on_delete=models.CASCADE)
-    provider_inventory = models.ForeignKey(ProviderInventory, on_delete=models.CASCADE)
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
+    provider = models.ForeignKey(Provider, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'api_reception_sc_2_04'
@@ -278,6 +365,37 @@ class ReceptionListSC204(Order):
         unique_together = (('reception', 'product'),)
         
     def __str__(self):
-        return (self.pk)
-
+        return str(self.pk)
+    
+    def clean(self):
+        warehouse = ReceptionSC204.objects.get(
+            voucher = self.reception.voucher
+        ).warehouse
+        
+        def validate_quantity():
+            exists = WarehouseInventory.objects.filter(
+                product=self.product,
+                warehouse=warehouse
+            ).exists()
+        
+            if exists :
+                self.existence = WarehouseInventory.objects.get(
+                    product = self.product,
+                    warehouse = warehouse
+                ).quantity
+                
+                WarehouseInventory.objects.update(
+                    product = self.product,
+                    warehouse = warehouse,
+                    quantity = self.quantity + self.existence
+                )        
+            else :
+                WarehouseInventory.objects.create(
+                    product=self.product,
+                    warehouse=warehouse,
+                    quantity=self.quantity
+                )
+        
+        validate_quantity()
+        
 # Operations End --------------------------------------------------------------------------------------------------------------------------------------------
