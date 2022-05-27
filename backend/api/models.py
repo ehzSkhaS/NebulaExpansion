@@ -21,6 +21,7 @@ class Product(models.Model):
         db_table = 'api_product'
         verbose_name = "Product"
         verbose_name_plural = "Products"
+        ordering = ['code']
 
     def __str__(self):
         return str(self.code)
@@ -36,6 +37,7 @@ class Provider(models.Model):
         db_table = 'api_provider'
         verbose_name = "Provider"
         verbose_name_plural = "Providers"
+        ordering = ['code']
 
     def __str__(self):
         return str(self.code)
@@ -54,6 +56,7 @@ class Warehouse(models.Model):
         db_table = 'api_warehouse'
         verbose_name = "Warehouse"
         verbose_name_plural = "Warehouses"
+        ordering = ['code']
 
     def __str__(self):
         return str(self.code)
@@ -68,6 +71,7 @@ class WarehouseInventory(Inventory):
         verbose_name = "Warehouse Inventory"
         verbose_name_plural = "Warehouses Inventories"
         unique_together = (('warehouse', 'product'),)
+        ordering = ['warehouse']
 
     def __str__(self):
         return str(self.pk)
@@ -85,6 +89,7 @@ class Unit(models.Model):
         db_table = 'api_unit'
         verbose_name = "Unit"
         verbose_name_plural = "Units"
+        ordering = ['code']
 
     def __str__(self):
         return self.code
@@ -100,6 +105,7 @@ class CostCenter(models.Model):
         db_table = 'api_cost_center'
         verbose_name = "Cost Center"
         verbose_name_plural = "Cost Centers"
+        ordering = ['code']
 
     def __str__(self):
         return str(self.code)
@@ -114,6 +120,7 @@ class CostCenterInventory(Inventory):
         verbose_name = "Cost Center Inventory"
         verbose_name_plural = "Cost Centers Inventories"
         unique_together = (('cost_center', 'product'),)
+        ordering = ['cost_center']
 
     def __str__(self):
         return str(self.pk)
@@ -147,6 +154,7 @@ class DeliverySC208(models.Model):
         db_table = 'api_delivery_sc_2_08'
         verbose_name = "Delivery SC-2-08"
         verbose_name_plural = "Orders Delivery SC-2-08"
+        ordering = ['voucher']
 
     def __str__(self):
         return str(self.voucher)
@@ -160,6 +168,7 @@ class DeliveryListSC208(Order):
         verbose_name = "Delivery List SC-2-08"
         verbose_name_plural = "Orders Delivery SC-2-08 Lists"
         unique_together = (('delivery', 'product'),)
+        ordering = ['delivery']
         
     def __str__(self):
         return str(self.pk)
@@ -227,6 +236,7 @@ class DevolutionSC208(models.Model):
         db_table = 'api_devolution_sc_2_08'
         verbose_name = "Devolution SC-2-08"
         verbose_name_plural = "Orders Devolution SC-2-08"
+        ordering = ['voucher']
 
     def __str__(self):
         return str(self.voucher)
@@ -240,6 +250,7 @@ class DevolutionListSC208(Order):
         verbose_name = "Devolution List SC-2-08"
         verbose_name_plural = "Orders Devolution SC-2-08 Lists"
         unique_together = (('devolution', 'product'),)
+        ordering = ['devolution']
         
     def __str__(self):
         return str(self.pk)
@@ -294,6 +305,7 @@ class AdjustSC216(models.Model):
         db_table = 'api_adjust_sc_2_16'
         verbose_name = "Adjust SC-2-16"
         verbose_name_plural = "Orders Adjust SC-2-16"
+        ordering = ['voucher']
 
     def __str__(self):
         return str(self.voucher)
@@ -307,6 +319,7 @@ class AdjustListSC216(Order):
         verbose_name = "Adjust List SC-2-16"
         verbose_name_plural = "Orders Adjust SC-2-16 Lists"
         unique_together = (('adjust', 'product'),)
+        ordering = ['adjust']
         
     def __str__(self):
         return str(self.pk)
@@ -349,6 +362,7 @@ class ReceptionSC204(models.Model):
         db_table = 'api_reception_sc_2_04'
         verbose_name = "Reception SC-2-04"
         verbose_name_plural = "Orders Reception SC-2-04"
+        ordering = ['voucher']
 
     def __str__(self):
         return str(self.voucher)
@@ -362,6 +376,7 @@ class ReceptionListSC204(Order):
         verbose_name = "Reception List SC-2-04"
         verbose_name_plural = "Orders Reception SC-2-04 Lists"
         unique_together = (('reception', 'product'),)
+        ordering = ['reception']
         
     def __str__(self):
         return str(self.pk)

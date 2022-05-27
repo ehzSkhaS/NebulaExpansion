@@ -35,9 +35,6 @@ class ProductModel(admin.ModelAdmin):
         'account_sub',
         'description',
     )
-    ordering = (
-        'code',
-    )
     list_per_page = 10   
 
 
@@ -49,9 +46,6 @@ class ProviderModel(admin.ModelAdmin):
         'code',
         'name'
     )    
-    ordering = (
-        'code',
-    )
     list_per_page = 10
 
 # Enterprise End --------------------------------------------------------------------------------------------------------------------------------------------
@@ -64,9 +58,6 @@ class WarehouseModel(admin.ModelAdmin):
     list_display = (
         'code',
         'name'
-    )
-    ordering = (
-        'code',
     )
     list_per_page = 10
 
@@ -86,9 +77,6 @@ class WarehouseInventoryModel(admin.ModelAdmin):
     readonly_fields = (
         'quantity',
     )    
-    ordering = (
-        'warehouse',
-    )
     list_per_page = 10
 
 # Store End -------------------------------------------------------------------------------------------------------------------------------------------------
@@ -102,9 +90,6 @@ class UnitModel(admin.ModelAdmin):
         'code',
         'name'
     )    
-    ordering = (
-        'code',
-    )
     list_per_page = 10
 
 
@@ -115,9 +100,6 @@ class CostCenterModel(admin.ModelAdmin):
         'name',
         'unit'
     )    
-    ordering = (
-        'code',
-    )
     list_per_page = 10
 
     
@@ -136,9 +118,6 @@ class CostCenterInventoryModel(admin.ModelAdmin):
         'product',
         'quantity',
     )    
-    ordering = (
-        'cost_center',
-    )
     list_per_page = 10
     
 # Client End ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -173,9 +152,6 @@ class DeliveryModel(admin.ModelAdmin):
         'warehouse',
         'cost_center',
     )    
-    ordering = (
-        'voucher',
-    )
     list_per_page = 10
     
     
@@ -195,9 +171,6 @@ class DeliveryListModel(admin.ModelAdmin):
         'quantity',
         'existence'
     )    
-    ordering = (
-        'delivery',
-    )
     list_per_page = 10    
     
     
@@ -222,9 +195,6 @@ class DvolutionModel(admin.ModelAdmin):
         'warehouse',
         'cost_center',
     )    
-    ordering = (
-        'voucher',
-    )
     list_per_page = 10
     
     
@@ -244,9 +214,6 @@ class DevolutionListModel(admin.ModelAdmin):
         'quantity',
         'existence'
     )    
-    ordering = (
-        'devolution',
-    )
     list_per_page = 10    
     
     
@@ -271,9 +238,6 @@ class AdjustModel(admin.ModelAdmin):
         'inventory_manager',
         'warehouse',
     )
-    ordering = (
-        'voucher',
-    )
     list_per_page = 10
     
     
@@ -293,9 +257,6 @@ class AdjustListModel(admin.ModelAdmin):
         'quantity',
         'existence'
     )    
-    ordering = (
-        'adjust',
-    )
     list_per_page = 10
     
 
@@ -322,9 +283,6 @@ class ReceptionModel(admin.ModelAdmin):
         'warehouse',
         'provider',
     )
-    ordering = (
-        'voucher',
-    )
     list_per_page = 10
     
     
@@ -344,12 +302,7 @@ class ReceptionListModel(admin.ModelAdmin):
         'quantity',
         'existence'
     )
-    ordering = (
-        'reception',
-    )
     list_per_page = 10
-    
-    
 
    
 # Operations End --------------------------------------------------------------------------------------------------------------------------------------------
