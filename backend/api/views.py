@@ -1,60 +1,570 @@
 from .models import *
 from .serializers import *
-from django.http import JsonResponse, HttpResponse
-from rest_framework.parsers import JSONParser
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
 
 #TODO: the next import is necessary for testing the post and update methods
-from django.views.decorators.csrf import csrf_exempt
+#from django.views.decorators.csrf import csrf_exempt
 
-@csrf_exempt
+@api_view(['GET', 'POST'])
 def product_list(request):
     if request.method == 'GET':
         products = Product.objects.all()
         serializer = ProductSerializer(products, many=True)        
-        return JsonResponse(serializer.data, safe=False)    
+        return Response(serializer.data)
     elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = ProductSerializer(data=data)        
+        serializer = ProductSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data, status=201)                
-        return JsonResponse(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-@csrf_exempt
+    
+@api_view(['GET', 'PUT', 'DELETE'])
 def product_details(request, pk):
     try:
         product = Product.objects.get(code=pk)
     except Product.DoesNotExist:
-        return HttpResponse(status=404)
+        return Response(status=status.HTTP_404_NOT_FOUND)
     
     if request.method == 'GET':
         serializer = ProductSerializer(product)
-        return JsonResponse(serializer.data)    
+        return Response(serializer.data)    
     elif request.method == 'PUT':
-        data = JSONParser().parse(request)
-        # I need to use v2 because the code field is required on update
-        # for now I don't know how to change the validator for 
-        # set code as allow_null
-        serializer = ProductSerializerV2(product, data=data)
+        product = Product.objects.get(code=pk)
+        serializer = ProductSerializer(instance=product, data=request.data)
+        
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
         product.delete()
-        return HttpResponse(status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    
+# Enterprise ------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-@csrf_exempt
+@api_view(['GET', 'POST'])
 def provider_list(request):
     if request.method == 'GET':
         providers = Provider.objects.all()
         serializer = ProviderSerializer(providers, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        return Response(serializer.data)
     elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = ProviderSerializer(data=data)
+        serializer = ProviderSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def provider_details(request, pk):
+    try:
+        provider = Provider.objects.get(code=pk)
+    except Provider.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = ProviderSerializer(provider)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        provider = Provider.objects.get(code=pk)
+        serializer = ProviderSerializer(instance=provider, data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        provider.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+# Enterprise End --------------------------------------------------------------------------------------------------------------------------------------------
+
+
+# Store -----------------------------------------------------------------------------------------------------------------------------------------------------
+
+@api_view(['GET', 'POST'])
+def warehouse_list(request):
+    if request.method == 'GET':
+        warehouses = Warehouse.objects.all()
+        serializer = WarehouseSerializer(warehouses, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = WarehouseSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+@api_view(['GET', 'PUT', 'DELETE'])
+def warehouse_details(request, pk):
+    try:
+        warehouse = Warehouse.objects.get(code=pk)
+    except Warehouse.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = WarehouseSerializer(warehouse)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        warehouse = Warehouse.objects.get(code=pk)
+        serializer = WarehouseSerializer(instance=warehouse, data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        warehouse.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+def warehouse_inventory_list(request):
+    if request.method == 'GET':
+        warehouses_inventory = WarehouseInventory.objects.all()
+        serializer = WarehouseInventorySerializer(warehouses_inventory, many=True)
+        return Response(serializer.data)
+    
+    
+@api_view(['GET'])
+def warehouse_inventory_details(request, pk):
+    try:
+        warehouse_inventory = WarehouseInventory.objects.get(pk=pk)
+    except WarehouseInventory.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = WarehouseInventorySerializer(warehouse_inventory)
+        return Response(serializer.data)
+    
+# Store End -------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+# Client ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+@api_view(['GET', 'POST'])
+def unit_list(request):
+    if request.method == 'GET':
+        units = Unit.objects.all()
+        serializer = UnitSerializer(units, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = UnitSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def unit_details(request, pk):
+    try:
+        unit = Unit.objects.get(code=pk)
+    except Unit.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = UnitSerializer(unit)
+        return Response(serializer.data)    
+    elif request.method == 'PUT':
+        unit = Unit.objects.get(code=pk)
+        serializer = ProductSerializer(instance=unit, data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        unit.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET', 'POST'])
+def cost_center_list(request):
+    if request.method == 'GET':
+        cost_centers = CostCenter.objects.all()
+        serializer = CostCenterSerializer(cost_centers, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = CostCenterSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def cost_center_details(request, pk):
+    try:
+        cost_center = CostCenter.objects.get(code=pk)
+    except CostCenter.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = CostCenterSerializer(cost_center)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        cost_center = CostCenter.objects.get(code=pk)
+        serializer = CostCenterSerializer(instance=cost_center, data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        cost_center.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    
+@api_view(['GET'])
+def cost_center_inventory_list(request):
+    if request.method == 'GET':
+        cost_centers_inventory = CostCenterInventory.objects.all()
+        serializer = CostCenterInventorySerializer(cost_centers_inventory, many=True)
+        return Response(serializer.data)
+    
+    
+@api_view(['GET'])
+def cost_center_inventory_details(request, pk):
+    try:
+        cost_center_inventory = CostCenterInventory.objects.get(pk=pk)
+    except CostCenterInventory.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = CostCenterInventorySerializer(cost_center_inventory)
+        return Response(serializer.data)
+
+# Client End ------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+# Operations ------------------------------------------------------------------------------------------------------------------------------------------------
+
+@api_view(['GET', 'POST'])
+def delivery_SC208_list(request):
+    if request.method == 'GET':
+        deliveries_SC208 = DeliverySC208.objects.all()
+        serializer = DeliverySC208Serializer(deliveries_SC208, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = DeliverySC208Serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def delivery_SC208_details(request, pk):
+    try:
+        delivery_SC208 = DeliverySC208.objects.get(voucher=pk)
+    except DeliverySC208.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = DeliverySC208Serializer(delivery_SC208)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        delivery_SC208 = DeliverySC208.objects.get(voucher=pk)
+        serializer = DeliverySC208Serializer(instance=delivery_SC208, data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        delivery_SC208.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET', 'POST'])
+def delivery_list_SC208_list(request):
+    if request.method == 'GET':
+        deliveries_list_SC208 = DeliveryListSC208.objects.all()
+        serializer = DeliveryListSC208Serializer(deliveries_list_SC208, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = DeliveryListSC208Serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def delivery_list_SC208_details(request, pk):
+    try:
+        delivery_list_SC208 = DeliveryListSC208.objects.get(pk=pk)
+    except DeliveryListSC208.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = DeliveryListSC208Serializer(delivery_list_SC208)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        delivery_list_SC208 = DeliveryListSC208.objects.get(pk=pk)
+        serializer = DeliveryListSC208Serializer(instance=delivery_list_SC208, data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        delivery_list_SC208.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET', 'POST'])
+def devolution_SC208_list(request):
+    if request.method == 'GET':
+        devolutions_SC208 = DevolutionSC208.objects.all()
+        serializer = DevolutionSC208Serializer(devolutions_SC208, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = DevolutionSC208Serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def devolution_SC208_details(request, pk):
+    try:
+        devolution_SC208 = DevolutionSC208.objects.get(voucher=pk)
+    except DevolutionSC208.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = DevolutionSC208Serializer(devolution_SC208)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        devolution_SC208 = DevolutionSC208.objects.get(voucher=pk)
+        serializer = DevolutionSC208Serializer(instance=devolution_SC208, data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        devolution_SC208.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET', 'POST'])
+def devolution_list_SC208_list(request):
+    if request.method == 'GET':
+        devolutions_list_SC208 = DevolutionListSC208.objects.all()
+        serializer = DevolutionListSC208Serializer(devolutions_list_SC208, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = DevolutionListSC208Serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def devolution_list_SC208_details(request, pk):
+    try:
+        devolution_list_SC208 = DevolutionListSC208.objects.get(pk=pk)
+    except DevolutionListSC208.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = DevolutionListSC208Serializer(devolution_list_SC208)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        devolution_list_SC208 = DevolutionListSC208.objects.get(pk=pk)
+        serializer = DevolutionListSC208Serializer(instance=devolution_list_SC208, data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        devolution_list_SC208.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET', 'POST'])
+def adjust_SC216_list(request):
+    if request.method == 'GET':
+        adjusts_SC216 = AdjustSC216.objects.all()
+        serializer = AdjustSC216(adjusts_SC216, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = AdjustListSC216(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def adjust_SC216_details(request, pk):
+    try:
+        adjust_SC216 = AdjustSC216.objects.get(voucher=pk)
+    except AdjustSC216.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = AdjustSC216Serializer(adjust_SC216)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        adjust_SC216 = AdjustSC216.objects.get(voucher=pk)
+        serializer = AdjustSC216Serializer(instance=adjust_SC216, data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        adjust_SC216.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET', 'POST'])
+def adjust_list_SC216_list(request):
+    if request.method == 'GET':
+        adjusts_list_SC216 = AdjustListSC216.objects.all()
+        serializer = AdjustListSC216Serializer(adjusts_list_SC216, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = AdjustListSC216Serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def adjust_list_SC216_details(request, pk):
+    try:
+        adjust_list_SC216 = AdjustListSC216.objects.get(pk=pk)
+    except AdjustListSC216.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = AdjustListSC216Serializer(adjust_list_SC216)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        adjust_list_SC216 = AdjustListSC216.objects.get(pk=pk)
+        serializer = AdjustListSC216Serializer(instance=adjust_list_SC216, data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        adjust_list_SC216.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET', 'POST'])
+def reception_SC204_list(request):
+    if request.method == 'GET':
+        receptions_SC204 = ReceptionSC204.objects.all()
+        serializer = ReceptionSC204Serializer(receptions_SC204, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = ReceptionSC204Serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def reception_SC204_details(request, pk):
+    try:
+        reception_SC204 = ReceptionSC204.objects.get(voucher=pk)
+    except ReceptionSC204.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = ReceptionSC204Serializer(reception_SC204)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        reception_SC204 = ReceptionSC204.objects.get(voucher=pk)
+        serializer = ReceptionSC204Serializer(instance=reception_SC204, data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        reception_SC204.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET', 'POST'])
+def reception_list_SC204_list(request):
+    if request.method == 'GET':
+        receptions_list_SC204 = ReceptionListSC204.objects.all()
+        serializer = ReceptionListSC204Serializer(receptions_list_SC204, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = ReceptionListSC204Serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def reception_list_SC204_details(request, pk):
+    try:
+        reception_list_SC204 = ReceptionListSC204.objects.get(pk=pk)
+    except ReceptionListSC204.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = ReceptionListSC204Serializer(reception_list_SC204)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        reception_list_SC204 = ReceptionListSC204.objects.get(pk=pk)
+        serializer = ReceptionListSC204Serializer(instance=reception_list_SC204, data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        reception_list_SC204.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+# Operations End --------------------------------------------------------------------------------------------------------------------------------------------
