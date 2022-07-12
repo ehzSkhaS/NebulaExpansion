@@ -15,7 +15,7 @@ class Product(models.Model):
     account_sub = models.IntegerField(null=False)
     description = models.CharField(null=False, max_length=50)
     unit = models.CharField(null=False, max_length=10)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.FloatField(null=False)
 
     class Meta:
         db_table = 'api_product'
@@ -25,7 +25,7 @@ class Product(models.Model):
 
     def __str__(self):
         return str(self.code)
-    
+
 
 # Enterprise ------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -57,9 +57,15 @@ class Warehouse(models.Model):
         verbose_name = "Warehouse"
         verbose_name_plural = "Warehouses"
         ordering = ['code']
-
+        
     def __str__(self):
         return str(self.code)
+
+    @property
+    def inventory(self):
+        inventories = WarehouseInventory.objects.filter(warehouse=self)
+        filtered = inventories.values('product', 'quantity')
+        return filtered
 
 
 class WarehouseInventory(Inventory):
@@ -94,11 +100,17 @@ class Unit(models.Model):
     def __str__(self):
         return self.code
     
+    @property
+    def cost_centers(self):
+        centers = CostCenter.objects.filter(unit=self)
+        filtered = centers.values('code', 'name')      
+        return filtered
+    
     
 class CostCenter(models.Model):
     code = models.IntegerField(primary_key=True)
     name = models.CharField(null=False, max_length=50)
-    unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
+    unit = models.ForeignKey(Unit, related_name='centers', on_delete=models.CASCADE)
     products = models.ManyToManyField(Product, through='CostCenterInventory')
 
     class Meta:
@@ -109,6 +121,12 @@ class CostCenter(models.Model):
 
     def __str__(self):
         return str(self.code)
+    
+    @property
+    def inventory(self):
+        inventories = CostCenterInventory.objects.filter(cost_center=self)
+        filtered = inventories.values('product', 'quantity')
+        return filtered
     
 
 class CostCenterInventory(Inventory):
@@ -182,44 +200,44 @@ class DeliveryListSC208(Order):
         ).cost_center
         
         def validate_quantity():
-            quantity_w = WarehouseInventory.objects.get(
-                product = self.product,
-                warehouse = warehouse
-            ).quantity            
-            
-            if quantity_w >= self.quantity :
-                self.existence = quantity_w
-            
-                WarehouseInventory.objects.update(
-                    product = self.product,
-                    warehouse = warehouse,
-                    quantity = quantity_w - self.quantity
-                )
-                
-                exists = CostCenterInventory.objects.filter(
-                    product=self.product,
-                    cost_center=cost_center
-                ).exists()
-                
-                if exists:
-                    quantity_cc = CostCenterInventory.objects.get(
-                        product = self.product,
-                        cost_center = cost_center
-                    ).quantity
+            filter_l = DeliveryListSC208.objects.filter(
+                product=self.product,
+                delivery=self.delivery
+            )
+            filter_w = WarehouseInventory.objects.filter(
+                product=self.product,
+                warehouse=warehouse
+            )
+            filter_c = CostCenterInventory.objects.filter(
+                product=self.product,
+                cost_center=cost_center
+            )
+        
+            if not filter_l.exists():
+                if filter_w.exists():
+                    quantity_w = filter_w.get().quantity
                     
-                    CostCenterInventory.objects.update(
-                        product = self.product,
-                        cost_center = cost_center,
-                        quantity = quantity_cc + self.quantity
-                    )
+                    if quantity_w >= self.quantity :
+                        self.existence = quantity_w
+                        filter_w.select_for_update().update(
+                            quantity = quantity_w - self.quantity
+                        )
+                
+                        if filter_c.exists():
+                            quantity_c = filter_c.get().quantity
+                            filter_c.select_for_update().update(
+                                quantity = quantity_c + self.quantity
+                            )
+                        else:
+                            CostCenterInventory.objects.create(
+                                product=self.product,
+                                cost_center=cost_center,
+                                quantity=self.quantity
+                            )
+                    else:
+                        raise ValidationError({'quantity': 'devolution quantity must be less or equal to stored quantity'})
                 else:
-                    CostCenterInventory.objects.create(
-                        product=self.product,
-                        cost_center=cost_center,
-                        quantity=self.quantity
-                    )
-            else :
-                raise ValidationError({'quantity': 'delivery quantity must be less or equal to stored quantity'})
+                    raise ValidationError({'product': 'devolution product must be avaliable on the warehouse inventory'})
         
         validate_quantity()
      
@@ -240,6 +258,14 @@ class DevolutionSC208(models.Model):
 
     def __str__(self):
         return str(self.voucher)
+    
+    @property
+    def list(self):
+        devolutionlist = DevolutionListSC208.objects.filter(devolution=self)
+        filtered = devolutionlist.values('product', 'quantity', 'existence')
+        for e in filtered:            
+            e['product'] = Product.objects.filter(code=e['product']).values()        
+        return filtered
 
 
 class DevolutionListSC208(Order):
@@ -264,31 +290,44 @@ class DevolutionListSC208(Order):
         ).cost_center
         
         def validate_quantity():
-            quantity_w = WarehouseInventory.objects.get(
-                product = self.product,
-                warehouse = warehouse
-            ).quantity            
-            quantity_cc = CostCenterInventory.objects.get(
+            filter_l = DevolutionListSC208.objects.filter(
+                product=self.product,
+                devolution=self.devolution
+            )
+            filter_w = WarehouseInventory.objects.filter(
+                product=self.product,
+                warehouse=warehouse
+            )
+            filter_c = CostCenterInventory.objects.filter(
                 product = self.product,
                 cost_center = cost_center
-            ).quantity
+            )
             
-            if quantity_cc >= self.quantity :
-                self.existence = quantity_w
-            
-                WarehouseInventory.objects.update(
-                    product = self.product,
-                    warehouse = warehouse,
-                    quantity = quantity_w + self.quantity
-                )
-                
-                CostCenterInventory.objects.update(
-                    product = self.product,
-                    cost_center = cost_center,
-                    quantity = quantity_cc - self.quantity
-                )
-            else :
-                raise ValidationError({'quantity': 'devolution quantity must be less or equal to stored quantity'})
+            if not filter_l.exists():
+                if filter_c.exists():
+                    quantity_c = filter_c.get().quantity
+                    
+                    if quantity_c >= self.quantity:
+                        self.existence = quantity_c
+                        filter_c.select_for_update().update(
+                            quantity = quantity_c - self.quantity
+                        )
+                        
+                        if filter_w.exists():
+                            quantity_w = filter_w.get().quantity
+                            filter_w.select_for_update().update(
+                                quantity = quantity_w + self.quantity
+                            )
+                        else:
+                            WarehouseInventory.objects.create(
+                                product=self.product,
+                                warehouse=warehouse,
+                                quantity=self.quantity
+                            )
+                    else:
+                        raise ValidationError({'quantity': 'devolution quantity must be less or equal to stored quantity'})
+                else:
+                    raise ValidationError({'product': 'devolution product must be avaliable on the cost center inventory'})
         
         validate_quantity()
     
@@ -310,6 +349,14 @@ class AdjustSC216(models.Model):
     def __str__(self):
         return str(self.voucher)
     
+    @property
+    def list(self):
+        adjustlist = AdjustListSC216.objects.filter(adjust=self)
+        filtered = adjustlist.values('product', 'quantity', 'existence')
+        for e in filtered:            
+            e['product'] = Product.objects.filter(code=e['product']).values()        
+        return filtered
+    
 
 class AdjustListSC216(Order):
     adjust = models.ForeignKey(AdjustSC216, on_delete=models.CASCADE)    
@@ -330,23 +377,32 @@ class AdjustListSC216(Order):
         ).warehouse
         
         def validate_quantity():
-            quantity = WarehouseInventory.objects.get(
+            filter_l = AdjustListSC216.objects.filter(
+                product=self.product,
+                adjust=self.adjust
+            )
+            filter_w = WarehouseInventory.objects.filter(
                 product = self.product,
                 warehouse = warehouse
-            ).quantity
+            )
             
-            if quantity >= self.quantity or self.quantity < 0:
-                self.existence = quantity
+            if not filter_l.exists():
+                if filter_w.exists():
+                    quantity = filter_w.get().quantity
+                    
+                    if quantity >= self.quantity or self.quantity < 0:
+                        self.existence = quantity
+                        
+                        filter_w.select_for_update().update(
+                            quantity = self.existence - self.quantity
+                        )
+                    else :
+                        raise ValidationError({'quantity': 'adjust quantity must be less or equal to stored quantity'})
+                else:
+                    raise ValidationError({'product': 'adjust product must be avaliable on the warehouse inventory'})
             
-                WarehouseInventory.objects.update(
-                    product = self.product,
-                    warehouse = warehouse,
-                    quantity = self.existence - self.quantity
-                )
-            else :
-                raise ValidationError({'quantity': 'adjust quantity must be less or equal to stored quantity'})
-        
         validate_quantity()
+
 
 class ReceptionSC204(models.Model):
     voucher = models.AutoField(primary_key=True, unique_for_year="date_stamp", editable=False)
@@ -366,6 +422,14 @@ class ReceptionSC204(models.Model):
 
     def __str__(self):
         return str(self.voucher)
+    
+    @property
+    def list(self):
+        receptionlist = ReceptionListSC204.objects.filter(reception=self)
+        filtered = receptionlist.values('product', 'quantity', 'existence')
+        for e in filtered:            
+            e['product'] = Product.objects.filter(code=e['product']).values()        
+        return filtered
     
 
 class ReceptionListSC204(Order):
@@ -387,28 +451,27 @@ class ReceptionListSC204(Order):
         ).warehouse
         
         def validate_quantity():
-            exists = WarehouseInventory.objects.filter(
+            filter_l = ReceptionListSC204.objects.filter(
+                product=self.product,
+                reception=self.reception
+            )
+            filter_w = WarehouseInventory.objects.filter(
                 product=self.product,
                 warehouse=warehouse
-            ).exists()
-        
-            if exists :
-                self.existence = WarehouseInventory.objects.get(
-                    product = self.product,
-                    warehouse = warehouse
-                ).quantity
-                
-                WarehouseInventory.objects.update(
-                    product = self.product,
-                    warehouse = warehouse,
-                    quantity = self.quantity + self.existence
-                )        
-            else :
-                WarehouseInventory.objects.create(
-                    product=self.product,
-                    warehouse=warehouse,
-                    quantity=self.quantity
-                )
+            )
+            
+            if not filter_l.exists():
+                if filter_w.exists():
+                    self.existence = filter_w.get().quantity
+                    filter_w.select_for_update().update(
+                        quantity = self.existence + self.quantity
+                    )
+                else :
+                    WarehouseInventory.objects.create(
+                        product=self.product,
+                        warehouse=warehouse,
+                        quantity=self.quantity
+                    )
         
         validate_quantity()
         
