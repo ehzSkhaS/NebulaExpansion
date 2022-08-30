@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 # import os
 
@@ -72,7 +73,9 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            # os.path.join(BASE_DIR, 'core/templates'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -84,6 +87,24 @@ TEMPLATES = [
         },
     },
 ]
+
+APP_ORDER = {
+    "content": [ 
+        "Product",
+        "CostCenter",
+        "Unit",
+        "Provider",
+        "Warehouse",
+        "CostCenterInventory",
+        "WarehouseInventory",
+    ],
+    "order": [ 
+        "DeliverySC208", "DeliveryListSC208",
+        "DevolutionSC208", "DevolutionListSC208",
+        "AdjustSC216", "AdjustListSC216",
+        "ReceptionSC204", "ReceptionListSC204",
+    ],
+}
 
 WSGI_APPLICATION = 'core.wsgi.application'
 

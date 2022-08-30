@@ -11,7 +11,7 @@ class Inventory(models.Model):
 class Product(models.Model):
     code = models.IntegerField(primary_key=True)
     account = models.IntegerField(null=False)
-    account_sub = models.IntegerField(null=False)
+    account_sub = models.IntegerField(null=False, verbose_name='sub account')
     description = models.CharField(null=False, max_length=50)
     unit = models.CharField(null=False, max_length=10)
     price = models.FloatField(null=False)

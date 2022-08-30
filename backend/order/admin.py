@@ -15,21 +15,30 @@ class DeliveryModel(admin.ModelAdmin):
         'request_plan',
         'date_stamp',
         'warehouse_dispatcher',
+        'get_warehouse_code',
+        'get_warehouse_name',
         'cost_center_receiver',        
-        'warehouse',
-        'cost_center',
+        'get_cost_center_code',
+        'get_cost_center_name',
     )
-    list_filter = (
-        'request_voucher_1',
-        'request_voucher_2',
-        'request_plan',
-        'date_stamp',
-        'warehouse_dispatcher',
-        'cost_center_receiver',
-        'warehouse',
-        'cost_center',
-    )    
+    list_filter = []
     list_per_page = 10
+    
+    @admin.display(ordering='warehouse__code', description='warehouse code')
+    def get_warehouse_code(self, obj):
+        return obj.warehouse.code
+    
+    @admin.display(ordering='warehouse__name', description='warehouse name')
+    def get_warehouse_name(self, obj):
+        return obj.warehouse.name
+    
+    @admin.display(ordering='cost_center__code', description='cost center code')
+    def get_cost_center_code(self, obj):
+        return obj.cost_center.code
+    
+    @admin.display(ordering='cost_center__name', description='cost center name')
+    def get_cost_center_name(self, obj):
+        return obj.cost_center.name
     
     
 @admin.register(DeliveryListSC208)
@@ -39,16 +48,31 @@ class DeliveryListModel(admin.ModelAdmin):
     )
     list_display = (
         'delivery',
-        'product',
+        'get_product_code',
+        'get_product_description',
+        'get_product_unit',
+        'get_product_price',
         'quantity',
         'existence'
     )
-    list_filter = (
-        'product',
-        'quantity',
-        'existence'
-    )    
-    list_per_page = 10    
+    list_filter = []
+    list_per_page = 10
+    
+    @admin.display(ordering='product__code', description='product code')
+    def get_product_code(self, obj):
+        return obj.product.code
+    
+    @admin.display(ordering='product__description', description='description')
+    def get_product_description(self, obj):
+        return obj.product.description
+
+    @admin.display(ordering='product__unit', description='unit')
+    def get_product_unit(self, obj):
+        return obj.product.unit
+    
+    @admin.display(ordering='product__price', description='price')
+    def get_product_price(self, obj):
+        return obj.product.price
     
     
 @admin.register(DevolutionSC208)
@@ -61,18 +85,30 @@ class DvolutionModel(admin.ModelAdmin):
         'voucher',
         'date_stamp',
         'warehouse_receiver',
+        'get_warehouse_code',
+        'get_warehouse_name',
         'cost_center_dispatcher',        
-        'warehouse',
-        'cost_center',
+        'get_cost_center_code',
+        'get_cost_center_name',
     )
-    list_filter = (
-        'date_stamp',
-        'warehouse_receiver',
-        'cost_center_dispatcher',        
-        'warehouse',
-        'cost_center',
-    )    
+    list_filter = []
     list_per_page = 10
+    
+    @admin.display(ordering='warehouse__code', description='warehouse code')
+    def get_warehouse_code(self, obj):
+        return obj.warehouse.code
+    
+    @admin.display(ordering='warehouse__name', description='warehouse name')
+    def get_warehouse_name(self, obj):
+        return obj.warehouse.name
+    
+    @admin.display(ordering='cost_center__code', description='cost center code')
+    def get_cost_center_code(self, obj):
+        return obj.cost_center.code
+    
+    @admin.display(ordering='cost_center__name', description='cost center name')
+    def get_cost_center_name(self, obj):
+        return obj.cost_center.name
     
     
 @admin.register(DevolutionListSC208)
@@ -82,17 +118,31 @@ class DevolutionListModel(admin.ModelAdmin):
     )
     list_display = (
         'devolution',
-        'product',
+        'get_product_code',
+        'get_product_description',
+        'get_product_unit',
+        'get_product_price',
         'quantity',
         'existence'
     )
-    list_filter = (
-        'product',
-        'quantity',
-        'existence'
-    )    
+    list_filter = []
     list_per_page = 10    
     
+    @admin.display(ordering='product__code', description='product code')
+    def get_product_code(self, obj):
+        return obj.product.code
+    
+    @admin.display(ordering='product__description', description='description')
+    def get_product_description(self, obj):
+        return obj.product.description
+
+    @admin.display(ordering='product__unit', description='unit')
+    def get_product_unit(self, obj):
+        return obj.product.unit
+    
+    @admin.display(ordering='product__price', description='price')
+    def get_product_price(self, obj):
+        return obj.product.price
     
 @admin.register(AdjustSC216)
 class AdjustModel(admin.ModelAdmin):
@@ -106,16 +156,19 @@ class AdjustModel(admin.ModelAdmin):
         'concept',
         'store_manager',
         'inventory_manager',
-        'warehouse',
+        'get_warehouse_code',
+        'get_warehouse_name',
     )
-    list_filter = (
-        'date_stamp',
-        'concept',
-        'store_manager',
-        'inventory_manager',
-        'warehouse',
-    )
+    list_filter = []
     list_per_page = 10
+    
+    @admin.display(ordering='warehouse__code', description='warehouse code')
+    def get_warehouse_code(self, obj):
+        return obj.warehouse.code
+    
+    @admin.display(ordering='warehouse__name', description='warehouse name')
+    def get_warehouse_name(self, obj):
+        return obj.warehouse.name
     
     
 @admin.register(AdjustListSC216)
@@ -125,17 +178,31 @@ class AdjustListModel(admin.ModelAdmin):
     )
     list_display = (
         'adjust',
-        'product',
+        'get_product_code',
+        'get_product_description',
+        'get_product_unit',
+        'get_product_price',
         'quantity',
         'existence'
     )
-    list_filter = (
-        'product',
-        'quantity',
-        'existence'
-    )    
+    list_filter = []
     list_per_page = 10
     
+    @admin.display(ordering='product__code', description='product code')
+    def get_product_code(self, obj):
+        return obj.product.code
+    
+    @admin.display(ordering='product__description', description='description')
+    def get_product_description(self, obj):
+        return obj.product.description
+
+    @admin.display(ordering='product__unit', description='unit')
+    def get_product_unit(self, obj):
+        return obj.product.unit
+    
+    @admin.display(ordering='product__price', description='price')
+    def get_product_price(self, obj):
+        return obj.product.price
 
 @admin.register(ReceptionSC204)
 class ReceptionModel(admin.ModelAdmin):
@@ -148,19 +215,30 @@ class ReceptionModel(admin.ModelAdmin):
         'date_stamp',
         'bill_number',
         'warehouse_receiver',
-        'store_manager',        
-        'warehouse',
-        'provider',
+        'store_manager',
+        'get_warehouse_code',
+        'get_warehouse_name',
+        'get_provider_code',
+        'get_provider_name',
     )
-    list_filter = (
-        'date_stamp',
-        'bill_number',
-        'warehouse_receiver',
-        'store_manager',        
-        'warehouse',
-        'provider',
-    )
+    list_filter = []
     list_per_page = 10
+    
+    @admin.display(ordering='warehouse__code', description='warehouse code')
+    def get_warehouse_code(self, obj):
+        return obj.warehouse.code
+    
+    @admin.display(ordering='warehouse__name', description='warehouse name')
+    def get_warehouse_name(self, obj):
+        return obj.warehouse.name
+    
+    @admin.display(ordering='provider__code', description='provider code')
+    def get_provider_code(self, obj):
+        return obj.provider.code
+    
+    @admin.display(ordering='provider__name', description='provider name')
+    def get_provider_name(self, obj):
+        return obj.provider.name
     
     
 @admin.register(ReceptionListSC204)
@@ -170,14 +248,28 @@ class ReceptionListModel(admin.ModelAdmin):
     )
     list_display = (
         'reception',
-        'product',
+        'get_product_code',
+        'get_product_description',
+        'get_product_unit',
+        'get_product_price',
         'quantity',
         'existence'
     )
-    list_filter = (
-        'product',
-        'quantity',
-        'existence'
-    )
+    list_filter = []
     list_per_page = 10
 
+    @admin.display(ordering='product__code', description='product code')
+    def get_product_code(self, obj):
+        return obj.product.code
+    
+    @admin.display(ordering='product__description', description='description')
+    def get_product_description(self, obj):
+        return obj.product.description
+
+    @admin.display(ordering='product__unit', description='unit')
+    def get_product_unit(self, obj):
+        return obj.product.unit
+    
+    @admin.display(ordering='product__price', description='price')
+    def get_product_price(self, obj):
+        return obj.product.price
