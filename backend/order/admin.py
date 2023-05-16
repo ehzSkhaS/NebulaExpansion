@@ -24,19 +24,19 @@ class DeliveryModel(admin.ModelAdmin):
     list_filter = []
     list_per_page = 10
     
-    @admin.display(ordering='warehouse__code', description='warehouse code')
+    @admin.display(ordering='warehouse__code', description='código de almacén')
     def get_warehouse_code(self, obj):
         return obj.warehouse.code
     
-    @admin.display(ordering='warehouse__name', description='warehouse name')
+    @admin.display(ordering='warehouse__name', description='nombre de almacén')
     def get_warehouse_name(self, obj):
         return obj.warehouse.name
     
-    @admin.display(ordering='cost_center__code', description='cost center code')
+    @admin.display(ordering='cost_center__code', description='código centro de costo')
     def get_cost_center_code(self, obj):
         return obj.cost_center.code
     
-    @admin.display(ordering='cost_center__name', description='cost center name')
+    @admin.display(ordering='cost_center__name', description='nombre centro de costo')
     def get_cost_center_name(self, obj):
         return obj.cost_center.name
     
@@ -58,19 +58,19 @@ class DeliveryListModel(admin.ModelAdmin):
     list_filter = []
     list_per_page = 10
     
-    @admin.display(ordering='product__code', description='product code')
+    @admin.display(ordering='product__code', description='código del producto')
     def get_product_code(self, obj):
         return obj.product.code
     
-    @admin.display(ordering='product__description', description='description')
+    @admin.display(ordering='product__description', description='descripción')
     def get_product_description(self, obj):
         return obj.product.description
 
-    @admin.display(ordering='product__unit', description='unit')
+    @admin.display(ordering='product__unit', description='unidad')
     def get_product_unit(self, obj):
         return obj.product.unit
     
-    @admin.display(ordering='product__price', description='price')
+    @admin.display(ordering='product__price', description='precio')
     def get_product_price(self, obj):
         return obj.product.price
     
@@ -94,19 +94,19 @@ class DvolutionModel(admin.ModelAdmin):
     list_filter = []
     list_per_page = 10
     
-    @admin.display(ordering='warehouse__code', description='warehouse code')
+    @admin.display(ordering='warehouse__code', description='código del almacén')
     def get_warehouse_code(self, obj):
         return obj.warehouse.code
     
-    @admin.display(ordering='warehouse__name', description='warehouse name')
+    @admin.display(ordering='warehouse__name', description='nombre del almacén')
     def get_warehouse_name(self, obj):
         return obj.warehouse.name
     
-    @admin.display(ordering='cost_center__code', description='cost center code')
+    @admin.display(ordering='cost_center__code', description='código del centro de costo')
     def get_cost_center_code(self, obj):
         return obj.cost_center.code
     
-    @admin.display(ordering='cost_center__name', description='cost center name')
+    @admin.display(ordering='cost_center__name', description='nombre del centro de costo')
     def get_cost_center_name(self, obj):
         return obj.cost_center.name
     
@@ -128,19 +128,19 @@ class DevolutionListModel(admin.ModelAdmin):
     list_filter = []
     list_per_page = 10    
     
-    @admin.display(ordering='product__code', description='product code')
+    @admin.display(ordering='product__code', description='código del producto')
     def get_product_code(self, obj):
         return obj.product.code
     
-    @admin.display(ordering='product__description', description='description')
+    @admin.display(ordering='product__description', description='descripción')
     def get_product_description(self, obj):
         return obj.product.description
 
-    @admin.display(ordering='product__unit', description='unit')
+    @admin.display(ordering='product__unit', description='unidad')
     def get_product_unit(self, obj):
         return obj.product.unit
     
-    @admin.display(ordering='product__price', description='price')
+    @admin.display(ordering='product__price', description='precio')
     def get_product_price(self, obj):
         return obj.product.price
     
@@ -155,18 +155,18 @@ class AdjustModel(admin.ModelAdmin):
         'date_stamp',
         'concept',
         'store_manager',
-        'inventory_manager',
+        # 'inventory_manager',
         'get_warehouse_code',
         'get_warehouse_name',
     )
     list_filter = []
     list_per_page = 10
     
-    @admin.display(ordering='warehouse__code', description='warehouse code')
+    @admin.display(ordering='warehouse__code', description='código del almacén')
     def get_warehouse_code(self, obj):
         return obj.warehouse.code
     
-    @admin.display(ordering='warehouse__name', description='warehouse name')
+    @admin.display(ordering='warehouse__name', description='nombre del almacén')
     def get_warehouse_name(self, obj):
         return obj.warehouse.name
     
@@ -188,19 +188,19 @@ class AdjustListModel(admin.ModelAdmin):
     list_filter = []
     list_per_page = 10
     
-    @admin.display(ordering='product__code', description='product code')
+    @admin.display(ordering='product__code', description='código del prroducto')
     def get_product_code(self, obj):
         return obj.product.code
     
-    @admin.display(ordering='product__description', description='description')
+    @admin.display(ordering='product__description', description='descripción')
     def get_product_description(self, obj):
         return obj.product.description
 
-    @admin.display(ordering='product__unit', description='unit')
+    @admin.display(ordering='product__unit', description='unidad')
     def get_product_unit(self, obj):
         return obj.product.unit
     
-    @admin.display(ordering='product__price', description='price')
+    @admin.display(ordering='product__price', description='precio')
     def get_product_price(self, obj):
         return obj.product.price
 
@@ -224,19 +224,19 @@ class ReceptionModel(admin.ModelAdmin):
     list_filter = []
     list_per_page = 10
     
-    @admin.display(ordering='warehouse__code', description='warehouse code')
+    @admin.display(ordering='warehouse__code', description='código del almacén')
     def get_warehouse_code(self, obj):
         return obj.warehouse.code
     
-    @admin.display(ordering='warehouse__name', description='warehouse name')
+    @admin.display(ordering='warehouse__name', description='nombre del almacén')
     def get_warehouse_name(self, obj):
         return obj.warehouse.name
     
-    @admin.display(ordering='provider__code', description='provider code')
+    @admin.display(ordering='provider__code', description='código del proveedor')
     def get_provider_code(self, obj):
         return obj.provider.code
     
-    @admin.display(ordering='provider__name', description='provider name')
+    @admin.display(ordering='provider__name', description='nombre del proveedor')
     def get_provider_name(self, obj):
         return obj.provider.name
     
@@ -258,18 +258,18 @@ class ReceptionListModel(admin.ModelAdmin):
     list_filter = []
     list_per_page = 10
 
-    @admin.display(ordering='product__code', description='product code')
+    @admin.display(ordering='product__code', description='código del producto')
     def get_product_code(self, obj):
         return obj.product.code
     
-    @admin.display(ordering='product__description', description='description')
+    @admin.display(ordering='product__description', description='descripción')
     def get_product_description(self, obj):
         return obj.product.description
 
-    @admin.display(ordering='product__unit', description='unit')
+    @admin.display(ordering='product__unit', description='unidad')
     def get_product_unit(self, obj):
         return obj.product.unit
     
-    @admin.display(ordering='product__price', description='price')
+    @admin.display(ordering='product__price', description='precio')
     def get_product_price(self, obj):
         return obj.product.price
